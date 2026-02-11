@@ -52,8 +52,9 @@ export class TypesenseHelper {
     const schema: CollectionCreateSchema = {
       name: this.collectionNameTmp,
       fields: [
-        // use page_id for distinct
-        //   { name: 'page_id', type: 'string', facet: true },
+        // use page_id for grouping and limit 1
+        // This will turn the search into "Most Relevant Pages" instead of "Most Relevant Snippets". This will diversify the results to come from multiple pages.
+        { name: 'page_id', type: 'string', facet: true },
         { name: 'objectID', type: 'string', index: false },
 
         { name: 'title', type: 'string', locale: textLocale },

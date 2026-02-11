@@ -24,7 +24,6 @@ const client = new Client({
   ],
   apiKey: 'xyz',
   connectionTimeoutSeconds: 2,
-  logLevel: 'debug',
 });
 
 // update the index settings and sync search indexes

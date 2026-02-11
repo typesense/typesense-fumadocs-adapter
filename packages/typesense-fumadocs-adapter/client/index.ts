@@ -34,8 +34,8 @@ export function useTypesenseSearch({
   const onStart = useRef<() => void>(undefined);
 
   const cacheKey = useMemo(() => {
-    return key ?? JSON.stringify([debouncedValue, options.locale, options.tag]);
-  }, [debouncedValue, options.locale, options.tag, key]);
+    return key ?? JSON.stringify([debouncedValue, options.tag]);
+  }, [debouncedValue, options.tag, key]);
 
   useOnChange(cacheKey, () => {
     const cached = cache.get(cacheKey);

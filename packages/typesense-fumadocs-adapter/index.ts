@@ -132,9 +132,6 @@ function toTypesenseDocument(page: DocumentRecord): TypesenseDocument[] {
       createDocument(undefined, undefined, page.description),
     );
   const { headings, contents } = page.structured;
-  if (page.url === '/docs/test') {
-    console.log('Processing /docs/test', page.structured);
-  }
 
   for (const p of contents) {
     const heading = p.heading ? headings.find((h) => p.heading === h.id) : null;

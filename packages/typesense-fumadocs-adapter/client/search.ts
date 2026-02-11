@@ -18,8 +18,6 @@ export interface TypesenseOptions {
    */
   tag?: string;
 
-  locale?: string;
-
   onSearch?: (
     query: string,
     tag?: string,
@@ -61,12 +59,12 @@ export function groupResults(
 
 export async function searchDocs(
   query: string,
-  { typesenseCollectionName, onSearch, client, locale, tag }: TypesenseOptions,
+  { typesenseCollectionName, onSearch, client, tag }: TypesenseOptions,
 ): Promise<SortedResult[]> {
   if (query.trim().length === 0) return [];
 
   const result = onSearch
-    ? await onSearch(query, tag, locale)
+    ? await onSearch(query, tag)
     : await client
         .collections<TypesenseDocument>(typesenseCollectionName)
         .documents()
@@ -74,17 +72,19 @@ export async function searchDocs(
           q: query,
           query_by: 'title,section,content',
           // include_fields:"",
-          // group_by: 'page_id',
-          // group_limit: 1,
+          group_by: 'page_id',
+          group_limit: 3,
           limit: 10,
           filter_by: tag ? `tag:${tag}` : undefined,
         });
 
   const highlighter = createContentHighlighter(query);
 
-  if (!result.hits) return [];
+  if (!result.grouped_hits) return [];
 
-  return groupResults(result.hits).map((hit) => {
+  const flatHits = result.grouped_hits?.flatMap((group) => group.hits) || [];
+
+  return groupResults(flatHits).map((hit) => {
     return {
       ...hit,
       contentWithHighlights: hit.content
