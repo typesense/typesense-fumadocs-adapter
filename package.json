@@ -1,11 +1,12 @@
 {
-  "name": "typesense-fumadocs-adapter",
-  "module": "src/index.ts",
+  "name": "typesense-fumadocs-adapter-monorepo",
   "type": "module",
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
+  "workspaces": [
+    "docs",
+    "packages/*"
+  ],
+  "scripts": {
+    "docs-dev": "cd docs && bun dev",
+    "docs-build": "cd docs && bun run build"
   }
 }

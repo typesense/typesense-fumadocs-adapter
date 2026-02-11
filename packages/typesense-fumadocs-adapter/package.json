@@ -1,0 +1,26 @@
+{
+  "name": "typesense-fumadocs-adapter",
+  "module": "index.ts",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./client": "./client/index.ts"
+  },
+  "files": [
+    "./client/*",
+    "index.ts",
+    "types.ts",
+    "typesenseHelpter.ts"
+  ],
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5",
+    "fumadocs-core": "^16.4.11",
+    "fumadocs-ui": "^16.4.11",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "typesense": "^2.1.0"
+  }
+}
