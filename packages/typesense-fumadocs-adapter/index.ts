@@ -60,7 +60,7 @@ export interface SyncOptions {
  * Update index settings and replace all objects
  *
  * @param client - Typesense Server Client with Write Permissions
- * @param options - Index Options
+ * @param options - Sync Options
  */
 export async function sync(
   client: TypesenseClient,
@@ -81,22 +81,22 @@ export async function sync(
     docsByLocale.get(locale)!.push(doc);
   }
 
-  // Iterate and sync each locale separately
-  console.log(`Found ${docsByLocale.size} languages to index.`);
+  console.log(
+    `\n🔄 Typesense Fumadocs Adapter: Syncing ${docsByLocale.size} locales...`,
+  );
 
   for (const [locale, docs] of docsByLocale) {
     const localizedCollectionName = `${typesenseCollectionName}_${locale}`;
 
-    console.log(
-      `\n⏳ Indexing [${locale}] to collection: "${localizedCollectionName}"...`,
-    );
+    console.log(`📑 Indexing [${locale}] -> "${localizedCollectionName}"`);
+    console.log(`   └── Count: ${docs.length} pages`);
 
     await updateDocuments(
       client,
       {
         ...options,
-        typesenseCollectionName: localizedCollectionName, // Override name
-        documents: docs, // Only pass docs for this language
+        typesenseCollectionName: localizedCollectionName,
+        documents: docs,
       },
       options.customLocaleCollectionSettings?.[locale],
       locale,

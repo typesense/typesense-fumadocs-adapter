@@ -56,8 +56,9 @@ export default function TypesenseSearchDialog(props: SharedProps) {
         <SearchDialogList items={query.data !== 'empty' ? query.data : null} />
         <SearchDialogFooter>
           <a
-            href='https://algolia.com'
+            href='https://typesense.org'
             rel='noreferrer noopener'
+            target='_blank'
             className='ms-auto text-xs text-fd-muted-foreground'
           >
             Search powered by Typesense

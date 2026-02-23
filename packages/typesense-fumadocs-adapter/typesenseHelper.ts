@@ -129,7 +129,7 @@ export class TypesenseHelper {
 
     const color = fromSitemap ? '96' : '94';
     console.log(
-      `\x1b[${color}m> Typesense DocSearch: \x1b[0m${url}\x1b[93m ${recordCount} records\x1b[0m`,
+      `\x1b[${color}m> Indexed\x1b[0m${url}\x1b[93m ${recordCount} records\x1b[0m`,
     );
   }
 

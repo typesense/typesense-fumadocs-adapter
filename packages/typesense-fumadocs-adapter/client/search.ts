@@ -71,8 +71,8 @@ export async function searchDocs(
         .search({
           q: query,
           query_by: 'title,section,content',
-          // include_fields:"",
           group_by: 'page_id',
+          exclude_fields: 'out_of,search_time_ms',
           group_limit: 3,
           limit: 10,
           filter_by: tag ? `tag:${tag}` : undefined,
