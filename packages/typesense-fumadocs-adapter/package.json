@@ -12,6 +12,20 @@
   "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "0.1.1",
+  "keywords": [
+    "typesense",
+    "documentation-search",
+    "search",
+    "fumadocs-adapter",
+    "fumadocs-plugin",
+    "fumadocs",
+    "plugin",
+    "adapter"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
