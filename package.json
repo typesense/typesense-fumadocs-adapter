@@ -1,5 +1,6 @@
 {
   "name": "typesense-fumadocs-adapter-monorepo",
+  "description": "An adapter to add Typesense-powered search to your Fumadocs site",
   "type": "module",
   "homepage": "https://github.com/typesense/typesense-fumadocs-adapter",
   "repository": {
