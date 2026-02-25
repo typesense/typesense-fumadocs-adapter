@@ -8,5 +8,8 @@
   "scripts": {
     "docs-dev": "cd docs && bun dev",
     "docs-build": "cd docs && bun run build"
+  },
+  "devDependencies": {
+    "@changesets/cli": "^2.29.8"
   }
 }
