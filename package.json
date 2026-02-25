@@ -1,13 +1,22 @@
 {
   "name": "typesense-fumadocs-adapter-monorepo",
   "type": "module",
+  "homepage": "https://github.com/typesense/typesense-fumadocs-adapter",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/typesense/typesense-fumadocs-adapter.git",
+    "directory": "packages/typesense-fumadocs-adapter"
+  },
+  "bugs": "https://github.com/typesense/typesense-fumadocs-adapter/issues",
   "workspaces": [
     "docs",
     "packages/*"
   ],
   "scripts": {
     "docs-dev": "cd docs && bun dev",
-    "docs-build": "cd docs && bun run build"
+    "docs-build": "cd docs && bun run build",
+    "plugin-build": "cd packages/typesense-fumadocs-adapter && bun run build",
+    "plugin-publish": "cd packages/typesense-fumadocs-adapter && npm publish"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.8"

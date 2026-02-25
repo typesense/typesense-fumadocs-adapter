@@ -1,19 +1,41 @@
 {
   "name": "typesense-fumadocs-adapter",
-  "module": "index.ts",
+  "homepage": "https://github.com/typesense/typesense-fumadocs-adapter",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/typesense/typesense-fumadocs-adapter.git",
+    "directory": "packages/typesense-fumadocs-adapter"
+  },
+  "bugs": "https://github.com/typesense/typesense-fumadocs-adapter/issues",
+  "license": "Apache-2.0",
   "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./index.ts",
-    "./client": "./client/index.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./client": {
+      "types": "./dist/client/index.d.ts",
+      "import": "./dist/client/index.js",
+      "require": "./dist/client/index.cjs"
+    }
   },
   "files": [
-    "./client/*",
-    "index.ts",
-    "types.ts",
-    "typesenseHelpter.ts"
+    "dist"
   ],
+  "scripts": {
+    "build": "tsdown",
+    "prepublishOnly": "bun run build",
+    "dev": "tsdown --watch",
+    "clean": "rm -rf dist"
+  },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "tsdown": "^0.20.3"
   },
   "peerDependencies": {
     "typescript": "^5",
