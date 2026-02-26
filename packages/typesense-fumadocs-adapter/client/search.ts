@@ -70,7 +70,7 @@ export async function searchDocs(
         .documents()
         .search({
           q: query,
-          query_by: 'title,section,content',
+          query_by: 'searchable_title,content',
           group_by: 'page_id',
           exclude_fields: 'out_of,search_time_ms',
           group_limit: 3,

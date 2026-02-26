@@ -58,6 +58,7 @@ export class TypesenseHelper {
         { name: 'objectID', type: 'string', index: false },
 
         { name: 'title', type: 'string', locale: textLocale },
+        { name: 'searchable_title', type: 'string', optional: true, locale: textLocale },
         { name: 'content', type: 'string', locale: textLocale },
         { name: 'section', type: 'string', optional: true, locale: textLocale },
         {

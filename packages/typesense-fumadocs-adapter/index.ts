@@ -108,12 +108,14 @@ function toTypesenseDocument(page: DocumentRecord): TypesenseDocument[] {
   let id = 0;
   const documentRecords: TypesenseDocument[] = [];
   const scannedHeadings = new Set<string>();
+  let titleIndexed = false;
+
   function createDocument(
     section: string | undefined,
     sectionId: string | undefined,
     content: string,
   ): TypesenseDocument {
-    return {
+    const doc: TypesenseDocument = {
       objectID: `${page._id}-${(id++).toString()}`,
       breadcrumbs: page.breadcrumbs,
       title: page.title,
@@ -125,12 +127,19 @@ function toTypesenseDocument(page: DocumentRecord): TypesenseDocument[] {
       content,
       ...page.extra_data,
     };
+
+    if (!titleIndexed) {
+      doc.searchable_title = page.title;
+      titleIndexed = true;
+    }
+    return doc;
   }
 
   if (page.description)
     documentRecords.push(
       createDocument(undefined, undefined, page.description),
     );
+
   const { headings, contents } = page.structured;
 
   for (const p of contents) {
@@ -191,11 +200,12 @@ export async function updateDocuments(
 export interface TypesenseDocument {
   objectID: string;
   title: string;
+  searchable_title?: string;
   url: string;
   tag?: string;
 
   /**
-   * The id of page, used for distinct
+   * The id of page, used for group_by
    */
   page_id: string;
 
