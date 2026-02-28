@@ -1,9 +1,6 @@
 import type { TypesenseDocument } from '../index';
 import type { Client } from 'typesense';
-import {
-  createContentHighlighter,
-  type SortedResult,
-} from 'fumadocs-core/search';
+import type { SortedResult } from 'fumadocs-core/search';
 import type {
   SearchResponse,
   SearchResponseHit,
@@ -23,6 +20,14 @@ export interface TypesenseOptions {
    */
   locale?: string;
 
+  /**
+   * Support older versions of fumadocs-ui (< 16.6.0) by parsing `<mark>` tags into `contentWithHighlights`.
+   * This might impact performance.
+   *
+   * @defaultValue false
+   */
+  legacy?: boolean;
+
   onSearch?: (
     query: string,
     tag?: string,
@@ -30,32 +35,71 @@ export interface TypesenseOptions {
   ) => Promise<SearchResponse<TypesenseDocument>>;
 }
 
+interface HighlightedText {
+  type: 'text';
+  content: string;
+  styles?: {
+    highlight?: boolean;
+  };
+}
+
+function parseSnippet(snippet: string): HighlightedText[] {
+  return snippet
+    .split(/(<mark>.*?<\/mark>)/g)
+    .map((part) => {
+      if (part.startsWith('<mark>') && part.endsWith('</mark>')) {
+        return {
+          type: 'text' as const,
+          content: part.replace(/<\/?mark>/g, ''),
+          styles: { highlight: true },
+        };
+      }
+
+      return {
+        type: 'text' as const,
+        content: part,
+      };
+    })
+    .filter((part) => part.content.length > 0);
+}
+
 export function groupResults(
   hits: SearchResponseHit<TypesenseDocument>[],
+  legacy?: boolean,
 ): SortedResult[] {
   const grouped: SortedResult[] = [];
   const scannedUrls = new Set<string>();
 
   for (const doc of hits) {
     const hit = doc.document;
+    const highlight = doc.highlight;
 
     if (!scannedUrls.has(hit.url)) {
       scannedUrls.add(hit.url);
+
+      const title =
+        highlight?.searchable_title?.snippet ??
+        highlight?.title?.snippet ??
+        hit.title;
 
       grouped.push({
         id: hit.url,
         type: 'page',
         breadcrumbs: hit.breadcrumbs,
         url: hit.url,
-        content: hit.title,
+        content: legacy ? title.replace(/<\/?mark>/g, '') : title,
+        contentWithHighlights: legacy ? parseSnippet(title) : undefined,
       });
     }
+
+    const content = highlight?.content?.snippet ?? hit.content;
 
     grouped.push({
       id: hit.objectID,
       type: hit.content === hit.section ? 'heading' : 'text',
       url: hit.section_id ? `${hit.url}#${hit.section_id}` : hit.url,
-      content: hit.content,
+      content: legacy ? content.replace(/<\/?mark>/g, '') : content,
+      contentWithHighlights: legacy ? parseSnippet(content) : undefined,
     });
   }
 
@@ -70,9 +114,26 @@ export async function searchDocs(
     client,
     tag,
     locale,
+    legacy,
   }: TypesenseOptions,
-): Promise<SortedResult[]> {
-  if (query.trim().length === 0) return [];
+): Promise<{
+  results: SortedResult[];
+  raw: SearchResponse<TypesenseDocument>;
+}> {
+  if (query.trim().length === 0)
+    return {
+      results: [],
+      raw: {
+        found: 0,
+        hits: [],
+        out_of: 0,
+        page: 0,
+        search_time_ms: 0,
+        request_params: {
+          q: '',
+        },
+      },
+    };
 
   const collectionName = locale
     ? `${typesenseCollectionName}_${locale}`
@@ -93,18 +154,16 @@ export async function searchDocs(
           filter_by: tag ? `tag:${tag}` : undefined,
         });
 
-  const highlighter = createContentHighlighter(query);
-
-  if (!result.grouped_hits) return [];
+  if (!result.grouped_hits)
+    return {
+      results: [],
+      raw: result,
+    };
 
   const flatHits = result.grouped_hits?.flatMap((group) => group.hits) || [];
 
-  return groupResults(flatHits).map((hit) => {
-    return {
-      ...hit,
-      contentWithHighlights: hit.content
-        ? highlighter.highlight(hit.content)
-        : undefined,
-    };
-  });
+  return {
+    results: groupResults(flatHits, legacy),
+    raw: result,
+  };
 }

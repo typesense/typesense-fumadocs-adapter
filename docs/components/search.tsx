@@ -33,6 +33,7 @@ export default function TypesenseSearchDialog(props: SharedProps) {
   const { search, setSearch, query } = useTypesenseSearch({
     typesenseCollectionName: `typesense-fumadocs-adapter`,
     locale,
+    legacy: true,
     client,
   });
 

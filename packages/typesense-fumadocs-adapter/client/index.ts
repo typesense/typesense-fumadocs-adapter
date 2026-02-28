@@ -3,18 +3,26 @@ import { type SortedResult } from 'fumadocs-core/search';
 import { useDebounce } from './utils';
 import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { searchDocs, type TypesenseOptions } from './search';
+import type { SearchResponse } from 'typesense/lib/Typesense/Documents';
+import type { TypesenseDocument } from '../index';
 
-interface useTypesenseSearch {
+export interface UseTypesenseSearch {
   search: string;
   setSearch: (v: string) => void;
   query: {
     isLoading: boolean;
     data?: SortedResult[] | 'empty';
+    raw_data?: SearchResponse<TypesenseDocument>;
     error?: Error;
   };
 }
 
-const cache = new Map<string, SortedResult[] | 'empty'>();
+interface SearchResult {
+  results: SortedResult[] | 'empty';
+  raw?: SearchResponse<TypesenseDocument>;
+}
+
+const cache = new Map<string, SearchResult>();
 
 export function useTypesenseSearch({
   delayMs = 100,
@@ -25,9 +33,9 @@ export function useTypesenseSearch({
   delayMs?: number;
   allowEmpty?: boolean;
   key?: string;
-}): useTypesenseSearch {
+}): UseTypesenseSearch {
   const [search, setSearch] = useState('');
-  const [results, setResults] = useState<SortedResult[] | 'empty'>('empty');
+  const [result, setResult] = useState<SearchResult>({ results: 'empty' });
   const [error, setError] = useState<Error>();
   const [isLoading, setIsLoading] = useState(false);
   const debouncedValue = useDebounce(search, delayMs);
@@ -48,7 +56,7 @@ export function useTypesenseSearch({
     if (cached) {
       setIsLoading(false);
       setError(undefined);
-      setResults(cached);
+      setResult(cached);
       return;
     }
 
@@ -58,8 +66,9 @@ export function useTypesenseSearch({
       interrupt = true;
     };
 
-    async function run(): Promise<SortedResult[] | 'empty'> {
-      if (debouncedValue.length === 0 && !allowEmpty) return 'empty';
+    async function run(): Promise<SearchResult> {
+      if (debouncedValue.length === 0 && !allowEmpty)
+        return { results: 'empty' };
 
       return searchDocs(debouncedValue, options);
     }
@@ -70,7 +79,7 @@ export function useTypesenseSearch({
         if (interrupt) return;
 
         setError(undefined);
-        setResults(res);
+        setResult(res);
       })
       .catch((err: unknown) => {
         setError(err as Error);
@@ -80,5 +89,14 @@ export function useTypesenseSearch({
       });
   });
 
-  return { search, setSearch, query: { isLoading, data: results, error } };
+  return {
+    search,
+    setSearch,
+    query: {
+      isLoading,
+      data: result.results,
+      raw_data: result.raw,
+      error,
+    },
+  };
 }
