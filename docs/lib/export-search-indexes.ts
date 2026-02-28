@@ -12,19 +12,17 @@ export async function exportSearchIndexes() {
   for (const page of source.getPages()) {
     let breadcrumbs: string[] | undefined;
     const pageTree = source.getPageTree(page.locale);
-
     const path = findPath(
       pageTree.children,
       (node) => node.type === 'page' && node.url === page.url,
     );
+
     if (path) {
       breadcrumbs = [];
       path.pop();
-
       if (isBreadcrumbItem(pageTree.name)) {
         breadcrumbs.push(pageTree.name);
       }
-
       for (const segment of path) {
         if (!isBreadcrumbItem(segment.name)) continue;
         breadcrumbs.push(segment.name);

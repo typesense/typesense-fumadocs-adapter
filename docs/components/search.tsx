@@ -31,7 +31,8 @@ export default function TypesenseSearchDialog(props: SharedProps) {
   const { locale } = useI18n(); // (optional) for i18n
 
   const { search, setSearch, query } = useTypesenseSearch({
-    typesenseCollectionName: `typesense-fumadocs-adapter_${locale || 'en'}`,
+    typesenseCollectionName: `typesense-fumadocs-adapter`,
+    locale,
     client,
   });
 
@@ -55,14 +56,16 @@ export default function TypesenseSearchDialog(props: SharedProps) {
         </SearchDialogHeader>
         <SearchDialogList items={query.data !== 'empty' ? query.data : null} />
         <SearchDialogFooter>
-          <a
-            href='https://typesense.org'
-            rel='noreferrer noopener'
-            target='_blank'
-            className='ms-auto text-xs text-fd-muted-foreground'
-          >
-            Search powered by Typesense
-          </a>
+          <div className='w-full text-right text-xs text-fd-muted-foreground'>
+            Search powered by{' '}
+            <a
+              href='https://typesense.org'
+              rel='noreferrer noopener'
+              target='_blank'
+            >
+              Typesense
+            </a>
+          </div>
         </SearchDialogFooter>
       </SearchDialogContent>
     </SearchDialog>

@@ -69,11 +69,10 @@ export async function sync(
   const { documents, typesenseCollectionName } = options;
 
   // Group documents by locale
-  const docsByLocale = new Map<string, DocumentRecord[]>();
+  const docsByLocale = new Map<string | undefined, DocumentRecord[]>();
 
   for (const doc of documents) {
-    // Fallback to 'en' or a default if locale is missing
-    const locale = doc.locale || 'en';
+    const locale = doc.locale;
 
     if (!docsByLocale.has(locale)) {
       docsByLocale.set(locale, []);
@@ -85,11 +84,20 @@ export async function sync(
     `\n🔄 Typesense Fumadocs Adapter: Syncing ${docsByLocale.size} locales...`,
   );
 
-  for (const [locale, docs] of docsByLocale) {
-    const localizedCollectionName = `${typesenseCollectionName}_${locale}`;
+  const singleLocaleMode = docsByLocale.size === 1;
 
-    console.log(`📑 Indexing [${locale}] -> "${localizedCollectionName}"`);
-    console.log(`   └── Count: ${docs.length} pages`);
+  for (const [locale, docs] of docsByLocale) {
+    const localizedCollectionName =
+      locale && !singleLocaleMode
+        ? `${typesenseCollectionName}_${locale}`
+        : typesenseCollectionName;
+
+    // Default to 'en' for schema generation if locale is missing
+    const schemaLocale = locale || 'en';
+
+    console.log(
+      `\n📑 [${schemaLocale}] Indexing ${docs.length} pages -> "${localizedCollectionName}"`,
+    );
 
     await updateDocuments(
       client,
@@ -98,10 +106,12 @@ export async function sync(
         typesenseCollectionName: localizedCollectionName,
         documents: docs,
       },
-      options.customLocaleCollectionSettings?.[locale],
-      locale,
+      locale ? options.customLocaleCollectionSettings?.[locale] : undefined,
+      schemaLocale,
     );
   }
+
+  console.log('\n✅ [Typesense] Syncing Complete.');
 }
 
 function toTypesenseDocument(page: DocumentRecord): TypesenseDocument[] {
@@ -190,7 +200,7 @@ export async function updateDocuments(
     await helper.addRecords(objects, '', false);
     await helper.commitTmpCollection();
 
-    console.log('✅ [Typesense] Indexing Complete.');
+    console.log(`   ✅ [${locale}] Completed`);
   } catch (error) {
     console.error('❌ [Typesense] Indexing Failed:');
     throw error;

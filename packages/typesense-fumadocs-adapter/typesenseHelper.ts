@@ -57,16 +57,25 @@ export class TypesenseHelper {
         { name: 'page_id', type: 'string', facet: true },
         { name: 'objectID', type: 'string', index: false },
 
-        { name: 'title', type: 'string', locale: textLocale },
-        { name: 'searchable_title', type: 'string', optional: true, locale: textLocale },
+        { name: 'title', type: 'string', index: false },
+        {
+          name: 'searchable_title',
+          type: 'string',
+          optional: true,
+          locale: textLocale,
+        },
         { name: 'content', type: 'string', locale: textLocale },
-        { name: 'section', type: 'string', optional: true, locale: textLocale },
+        {
+          name: 'section',
+          type: 'string',
+          optional: true,
+          index: false,
+        },
         {
           name: 'breadcrumbs',
           type: 'string[]',
           index: false,
           optional: true,
-          locale: textLocale,
         },
 
         { name: 'url', type: 'string', index: false },
@@ -129,8 +138,9 @@ export class TypesenseHelper {
     }
 
     const color = fromSitemap ? '96' : '94';
+    const prefix = url ? ` ${url}` : '';
     console.log(
-      `\x1b[${color}m> Indexed\x1b[0m${url}\x1b[93m ${recordCount} records\x1b[0m`,
+      `    └── \x1b[${color}mIndexed\x1b[0m${prefix} \x1b[93m${recordCount} records\x1b[0m`,
     );
   }
 

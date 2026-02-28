@@ -18,6 +18,11 @@ export interface TypesenseOptions {
    */
   tag?: string;
 
+  /**
+   * Search locale
+   */
+  locale?: string;
+
   onSearch?: (
     query: string,
     tag?: string,
@@ -59,14 +64,24 @@ export function groupResults(
 
 export async function searchDocs(
   query: string,
-  { typesenseCollectionName, onSearch, client, tag }: TypesenseOptions,
+  {
+    typesenseCollectionName,
+    onSearch,
+    client,
+    tag,
+    locale,
+  }: TypesenseOptions,
 ): Promise<SortedResult[]> {
   if (query.trim().length === 0) return [];
 
+  const collectionName = locale
+    ? `${typesenseCollectionName}_${locale}`
+    : typesenseCollectionName;
+
   const result = onSearch
-    ? await onSearch(query, tag)
+    ? await onSearch(query, tag, locale)
     : await client
-        .collections<TypesenseDocument>(typesenseCollectionName)
+        .collections<TypesenseDocument>(collectionName)
         .documents()
         .search({
           q: query,
