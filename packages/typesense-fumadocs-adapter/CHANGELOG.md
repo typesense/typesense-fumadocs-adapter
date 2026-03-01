@@ -1,5 +1,11 @@
 # typesense-fumadocs-adapter
 
+## 0.3.0
+
+### Minor Changes
+
+- Support i18n, use Typesense text match highlight, return raw Typesense results for more flexibility in the hook.
+
 ## 0.2.0
 
 ### Minor Changes
