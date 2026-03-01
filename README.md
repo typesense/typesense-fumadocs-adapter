@@ -1,6 +1,6 @@
 # Typesense Fumadocs Adapter 🔎⚡️
 
-An adapter that adds Typesense-powered, lightning-fast search to your Fumadocs site.
+An adapter that brings lightning-fast, typo-tolerant search powered by Typesense to your Fumadocs site.
 
 ## Installation
 
