@@ -26,7 +26,7 @@ const client = new Client({
   connectionTimeoutSeconds: 2,
 });
 
-// update the index settings and sync search indexes
+// update the collection settings and sync search indexes
 void sync(client, {
   typesenseCollectionName: 'typesense-fumadocs-adapter',
   documents: records,

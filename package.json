@@ -10,6 +10,7 @@
   },
   "bugs": "https://github.com/typesense/typesense-fumadocs-adapter/issues",
   "workspaces": [
+    "docs",
     "packages/*"
   ],
   "scripts": {

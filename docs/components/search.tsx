@@ -13,7 +13,7 @@ import {
 } from 'fumadocs-ui/components/dialog/search';
 import { useI18n } from 'fumadocs-ui/contexts/i18n';
 import { Client } from 'typesense';
-import { useTypesenseSearch } from '../../packages/typesense-fumadocs-adapter/client';
+import { useTypesenseSearch } from 'typesense-fumadocs-adapter/client';
 import { useEffect } from 'react';
 
 const client = new Client({
@@ -28,12 +28,12 @@ const client = new Client({
 });
 
 export default function TypesenseSearchDialog(props: SharedProps) {
-  const { locale } = useI18n(); // (optional) for i18n
+  const { locale } = useI18n(); // optional
 
   const { search, setSearch, query } = useTypesenseSearch({
     typesenseCollectionName: `typesense-fumadocs-adapter`,
     locale,
-    legacy: true,
+    legacy: false, // optional, set to true for fumadocs-ui version < 16.6.0
     client,
   });
 
@@ -58,13 +58,12 @@ export default function TypesenseSearchDialog(props: SharedProps) {
         <SearchDialogList items={query.data !== 'empty' ? query.data : null} />
         <SearchDialogFooter>
           <div className='w-full text-right text-xs text-fd-muted-foreground'>
-            Search powered by{' '}
             <a
               href='https://typesense.org'
               rel='noreferrer noopener'
               target='_blank'
             >
-              Typesense
+              Search powered by Typesense
             </a>
           </div>
         </SearchDialogFooter>
