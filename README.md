@@ -2,11 +2,19 @@
 
 An adapter that brings lightning-fast, typo-tolerant search powered by Typesense to your Fumadocs site.
 
-## Installation
+## Getting started
+
+Install dependencies:
 
 ```bash
-npm i typesense-fumadocs-adapter
+npm install typesense typesense-fumadocs-adapter
 ```
+Then, follow the [integration guide](https://www.fumadocs.dev/docs/headless/search/typesense) in the official Fumadocs documentation.
+
+## Search UI
+
+Refer to [this Search UI guide](https://www.fumadocs.dev/docs/search/typesense) to integrate Typesense with the Fumadocs UI components.
+
 
 ## About Typesense & Fumadocs
 
