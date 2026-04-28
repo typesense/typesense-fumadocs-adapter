@@ -1,5 +1,11 @@
 # typesense-fumadocs-adapter
 
+## 0.4.0
+
+### Minor Changes
+
+- Added `getDefaultCollectionFields(locale)` to allow customizing specific collection fields without redefining the entire schema.
+
 ## 0.3.0
 
 ### Minor Changes

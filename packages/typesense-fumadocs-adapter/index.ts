@@ -1,60 +1,11 @@
 import type { Client as TypesenseClient } from 'typesense';
-import type { StructuredData } from 'fumadocs-core/mdx-plugins';
 import { TypesenseHelper } from './typesenseHelper';
-import type { CustomSettings } from './types';
-
-export interface DocumentRecord {
-  /**
-   * The ID of document, must be unique
-   */
-  _id: string;
-
-  title: string;
-  description?: string;
-  breadcrumbs?: string[];
-
-  /**
-   * URL to the page
-   */
-  url: string;
-  structured: StructuredData;
-
-  /**
-   * Tag to filter results
-   */
-  tag?: string;
-
-  /**
-    The locale of the document e.g. `en`, `fr`
-  */
-  locale?: string;
-  /**
-   * Data to be added to each section index
-   */
-  extra_data?: object;
-}
-
-export interface SyncOptions {
-  /**
-   * Typesense Collection Name for documents.
-   */
-  typesenseCollectionName: string;
-
-  /**
-   * Search indexes
-   */
-  documents: DocumentRecord[];
-
-  /**
-   * Typesense creates different collections for different locales. This allows you to set custom collection settings per locale.
-   * ```
-   *  zh: {
-   *    token_separators: ["_", "-"]
-   *  }
-   * ```
-   */
-  customLocaleCollectionSettings?: Record<string, CustomSettings>;
-}
+import type {
+  CustomSettings,
+  DocumentRecord,
+  SyncOptions,
+  TypesenseDocument,
+} from './types';
 
 /**
  * Update index settings and replace all objects
@@ -178,7 +129,7 @@ function toTypesenseDocument(page: DocumentRecord): TypesenseDocument[] {
   return documentRecords;
 }
 
-export async function updateDocuments(
+async function updateDocuments(
   client: TypesenseClient,
   options: SyncOptions,
   collectionSettings: CustomSettings | undefined,
@@ -207,29 +158,5 @@ export async function updateDocuments(
   }
 }
 
-export interface TypesenseDocument {
-  objectID: string;
-  title: string;
-  searchable_title?: string;
-  url: string;
-  tag?: string;
-
-  /**
-   * The id of page, used for group_by
-   */
-  page_id: string;
-
-  /**
-   * Heading content
-   */
-  section?: string;
-
-  /**
-   * Heading (anchor) id
-   */
-  section_id?: string;
-
-  breadcrumbs?: string[];
-
-  content: string;
-}
+export * from './types';
+export { getDefaultCollectionFields } from './typesenseHelper';

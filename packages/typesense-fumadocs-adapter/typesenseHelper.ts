@@ -1,8 +1,7 @@
 import { Client } from 'typesense';
 import type { CollectionCreateSchema } from 'typesense/lib/Typesense/Collections';
 import type { ImportResponse } from 'typesense/lib/Typesense/Documents';
-import type { CustomSettings } from './types';
-import type { TypesenseDocument } from '.';
+import type { CustomSettings, TypesenseDocument } from './types';
 
 export class TypesenseHelper {
   private typesenseClient: Client;
@@ -51,37 +50,7 @@ export class TypesenseHelper {
 
     const schema: CollectionCreateSchema = {
       name: this.collectionNameTmp,
-      fields: [
-        // use page_id for grouping and limit 1
-        // This will turn the search into "Most Relevant Pages" instead of "Most Relevant Snippets". This will diversify the results to come from multiple pages.
-        { name: 'page_id', type: 'string', facet: true },
-        { name: 'objectID', type: 'string', index: false },
-
-        { name: 'title', type: 'string', index: false },
-        {
-          name: 'searchable_title',
-          type: 'string',
-          optional: true,
-          locale: textLocale,
-        },
-        { name: 'content', type: 'string', locale: textLocale },
-        {
-          name: 'section',
-          type: 'string',
-          optional: true,
-          index: false,
-        },
-        {
-          name: 'breadcrumbs',
-          type: 'string[]',
-          index: false,
-          optional: true,
-        },
-
-        { name: 'url', type: 'string', index: false },
-        { name: 'tag', type: 'string[]', facet: true, optional: true },
-        { name: 'section_id', type: 'string', index: false, optional: true },
-      ],
+      fields: getDefaultCollectionFields(textLocale),
       token_separators: ['_', '-'],
     };
 
@@ -239,4 +208,59 @@ export class TypesenseHelper {
         .upsert(override.id, overrideKeys as any);
     }
   }
+}
+
+/**
+ * Returns the default collection fields used when creating a Typesense collection.
+ *
+ * Use this when you need to customize specific fields without redefining the entire schema.
+ *
+ * @param locale - The locale used for text fields (e.g. `'en'`, `'zh'`). Should match the
+ * locale key in `customLocaleCollectionSettings`.
+ *
+ * @example
+ * // Make `section` searchable while keeping all other fields intact
+ * customLocaleCollectionSettings: {
+ *   en: {
+ *     field_definitions: [
+ *       ...getDefaultCollectionFields('en').filter(f => f.name !== 'section'),
+ *       { name: 'section', type: 'string', optional: true, index: true, locale: 'en' },
+ *     ]
+ *   }
+ * }
+ */
+export function getDefaultCollectionFields(
+  locale: string,
+): CollectionCreateSchema['fields'] {
+  return [
+    // use page_id for grouping and limit 1
+    // This will turn the search into "Most Relevant Pages" instead of "Most Relevant Snippets". This will diversify the results to come from multiple pages.
+    { name: 'page_id', type: 'string', facet: true },
+    { name: 'objectID', type: 'string', index: false },
+
+    { name: 'title', type: 'string', index: false },
+    {
+      name: 'searchable_title',
+      type: 'string',
+      optional: true,
+      locale: locale,
+    },
+    { name: 'content', type: 'string', locale: locale },
+    {
+      name: 'section',
+      type: 'string',
+      optional: true,
+      index: false,
+    },
+    {
+      name: 'breadcrumbs',
+      type: 'string[]',
+      index: false,
+      optional: true,
+    },
+
+    { name: 'url', type: 'string', index: false },
+    { name: 'tag', type: 'string[]', facet: true, optional: true },
+    { name: 'section_id', type: 'string', index: false, optional: true },
+  ];
 }
