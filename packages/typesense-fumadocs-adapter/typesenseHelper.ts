@@ -2,6 +2,7 @@ import { Client } from 'typesense';
 import type { CollectionCreateSchema } from 'typesense/lib/Typesense/Collections';
 import type { ImportResponse } from 'typesense/lib/Typesense/Documents';
 import type { CustomSettings, TypesenseDocument } from './types';
+import type { CollectionFieldSchema } from 'typesense/lib/Typesense/Collection';
 
 export class TypesenseHelper {
   private typesenseClient: Client;
@@ -231,7 +232,7 @@ export class TypesenseHelper {
  */
 export function getDefaultCollectionFields(
   locale: string,
-): CollectionCreateSchema['fields'] {
+): CollectionFieldSchema[] {
   return [
     // use page_id for grouping and limit 1
     // This will turn the search into "Most Relevant Pages" instead of "Most Relevant Snippets". This will diversify the results to come from multiple pages.

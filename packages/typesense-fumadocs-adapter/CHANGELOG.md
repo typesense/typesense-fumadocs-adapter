@@ -1,5 +1,11 @@
 # typesense-fumadocs-adapter
 
+## 0.4.1
+
+### Patch Changes
+
+- Fix return type of getDefaultCollectionFields getting undefined
+
 ## 0.4.0
 
 ### Minor Changes
