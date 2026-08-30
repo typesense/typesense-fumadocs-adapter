@@ -11,9 +11,7 @@ import {
   type TypesenseDocument,
 } from '../../index';
 
-const typesenseHost = process.env.TYPESENSE_HOST ?? '127.0.0.1';
-const typesensePort = Number(process.env.TYPESENSE_PORT ?? '8108');
-const typesenseProtocol = getTypesenseProtocol(process.env.TYPESENSE_PROTOCOL);
+const typesenseUrl = process.env.TYPESENSE_URL ?? 'http://localhost:8108';
 const typesenseApiKey = process.env.TYPESENSE_API_KEY ?? 'xyz';
 const runPrefix = `fumadocs_adapter_it_${Date.now()}_${randomUUID().replaceAll('-', '')}`;
 const docsIndexPath = resolve(
@@ -22,13 +20,7 @@ const docsIndexPath = resolve(
 );
 
 const client = new Client({
-  nodes: [
-    {
-      host: typesenseHost,
-      port: typesensePort,
-      protocol: typesenseProtocol,
-    },
-  ],
+  nodes: [{ url: typesenseUrl }],
   apiKey: typesenseApiKey,
   connectionTimeoutSeconds: 5,
   numRetries: 0,
@@ -36,15 +28,6 @@ const client = new Client({
 
 let docsRecords: DocumentRecord[] = [];
 let typesenseAvailable = false;
-
-function getTypesenseProtocol(value: string | undefined): 'http' | 'https' {
-  if (value === undefined || value === 'http') return 'http';
-  if (value === 'https') return 'https';
-
-  throw new Error(
-    `Unsupported TYPESENSE_PROTOCOL value: ${value}. Expected \`http\` or \`https\`.`,
-  );
-}
 
 function collectionName(testName: string): string {
   return `${runPrefix}_${testName}`;
@@ -80,7 +63,7 @@ beforeAll(async () => {
     typesenseAvailable = true;
   } catch (error) {
     throw new Error(
-      `Typesense is unavailable at ${typesenseProtocol}://${typesenseHost}:${typesensePort}. Run \`docker compose up -d typesense\` first.`,
+      `Typesense is unavailable at ${typesenseUrl}. Run \`docker compose up -d typesense\` first.`,
       { cause: error },
     );
   }

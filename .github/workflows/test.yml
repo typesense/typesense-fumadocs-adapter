@@ -19,11 +19,15 @@ jobs:
     services:
       typesense:
         image: typesense/typesense:30.2
-        env:
-          TYPESENSE_API_KEY: xyz
-          TYPESENSE_DATA_DIR: /data
         ports:
-          - 8108:8108
+          - 8108:8108/tcp
+        volumes:
+          - /tmp/typesense-server-data:/data
+        env:
+          TYPESENSE_DATA_DIR: '/data'
+          TYPESENSE_API_KEY: 'xyz'
+          TYPESENSE_ENABLE_CORS: true
+          TYPESENSE_URL: 'http://localhost:8108'
 
     steps:
       - name: Checkout repository
@@ -36,17 +40,6 @@ jobs:
 
       - name: Install dependencies
         run: bun ci
-
-      - name: Wait for Typesense
-        run: |
-          for attempt in {1..30}; do
-            if curl --fail --silent http://127.0.0.1:8108/health; then
-              exit 0
-            fi
-            sleep 1
-          done
-          echo 'Typesense did not become healthy in time.' >&2
-          exit 1
 
       - name: Typecheck
         run: bun run typecheck

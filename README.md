@@ -51,6 +51,8 @@ bun run test:integration
 
 The integration command first builds the Fumadocs app in `./docs` to produce its real search-index JSON then synced to Typesense. Test collections and aliases use a unique prefix and are removed after the suite.
 
+The integration suite defaults to `http://localhost:8108`. Set `TYPESENSE_URL` and `TYPESENSE_API_KEY` to test against a different server.
+
 Build the adapter package:
 
 ```bash
