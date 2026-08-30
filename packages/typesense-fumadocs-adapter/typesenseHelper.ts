@@ -261,7 +261,7 @@ export function getDefaultCollectionFields(
     },
 
     { name: 'url', type: 'string', index: false },
-    { name: 'tag', type: 'string[]', facet: true, optional: true },
+    { name: 'tag', type: 'string', facet: true, optional: true },
     { name: 'section_id', type: 'string', index: false, optional: true },
   ];
 }
