@@ -24,7 +24,7 @@
     "test:integration": "bun run test:integration:prepare && cd packages/typesense-fumadocs-adapter && bun run test:integration"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.29.8",
+    "@changesets/cli": "3.0.1",
     "@types/bun": "1.4.0"
   }
 }
