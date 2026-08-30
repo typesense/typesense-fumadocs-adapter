@@ -10,15 +10,21 @@
   },
   "bugs": "https://github.com/typesense/typesense-fumadocs-adapter/issues",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "docs"
   ],
   "scripts": {
     "docs-dev": "cd docs && bun dev",
     "docs-build": "cd docs && bun run build",
     "plugin-build": "cd packages/typesense-fumadocs-adapter && bun run build",
-    "plugin-publish": "cd packages/typesense-fumadocs-adapter && npm publish"
+    "plugin-publish": "cd packages/typesense-fumadocs-adapter && npm publish",
+    "test": "cd packages/typesense-fumadocs-adapter && bun run test",
+    "typecheck": "bunx tsc -p packages/typesense-fumadocs-adapter/tsconfig.json --noEmit",
+    "test:integration:prepare": "cd docs && bun run build:index",
+    "test:integration": "bun run test:integration:prepare && cd packages/typesense-fumadocs-adapter && bun run test:integration"
   },
   "devDependencies": {
-    "@changesets/cli": "^2.29.8"
+    "@changesets/cli": "^2.29.8",
+    "@types/bun": "1.4.0"
   }
 }

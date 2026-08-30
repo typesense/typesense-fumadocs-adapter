@@ -1,5 +1,9 @@
 import { Client } from 'typesense';
-import { sync, DocumentRecord } from 'typesense-fumadocs-adapter';
+import {
+  sync,
+  DocumentRecord,
+  getDefaultCollectionFields,
+} from 'typesense-fumadocs-adapter';
 import * as fs from 'node:fs';
 
 // the path of pre-rendered `static.json`, choose one according to your React framework
@@ -30,4 +34,9 @@ const client = new Client({
 void sync(client, {
   typesenseCollectionName: 'typesense-fumadocs-adapter',
   documents: records,
+  customLocaleCollectionSettings: {
+    en: {
+      field_definitions: [...getDefaultCollectionFields('en')],
+    },
+  },
 });

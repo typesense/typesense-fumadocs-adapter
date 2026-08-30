@@ -50,13 +50,16 @@
   ],
   "scripts": {
     "build": "tsdown",
+    "test": "echo 'No unit tests.'",
+    "test:integration": "bun test ./test/integration --timeout 30000",
     "prepublishOnly": "bun run build",
     "dev": "tsdown --watch",
     "clean": "rm -rf dist"
   },
   "devDependencies": {
     "@types/bun": "latest",
-    "tsdown": "^0.20.3"
+    "tsdown": "^0.20.3",
+    "typesense": "^2.1.0"
   },
   "peerDependencies": {
     "typescript": ">=5",

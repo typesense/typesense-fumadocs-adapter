@@ -3,7 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "next build && bun ./scripts/sync-content.ts",
+    "build": "bun run build:index && bun ./scripts/sync-content.ts",
+    "build:index": "next build",
     "dev": "next dev",
     "start": "next start",
     "types:check": "fumadocs-mdx && next typegen && tsc --noEmit",

@@ -105,6 +105,7 @@ export class TypesenseHelper {
         '❌ [Typesense] Error adding records:',
         error.importResults,
       );
+      throw error;
     }
 
     const color = fromSitemap ? '96' : '94';
