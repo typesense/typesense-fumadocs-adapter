@@ -50,7 +50,7 @@
   ],
   "scripts": {
     "build": "tsdown",
-    "test": "echo 'No unit tests.'",
+    "test:unit": "bun test ./test/unit",
     "test:integration": "bun test ./test/integration --timeout 30000",
     "prepublishOnly": "bun run build",
     "dev": "tsdown --watch",

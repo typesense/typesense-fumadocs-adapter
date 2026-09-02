@@ -18,7 +18,7 @@
     "docs-build": "cd docs && bun run build",
     "plugin-build": "cd packages/typesense-fumadocs-adapter && bun run build",
     "plugin-publish": "cd packages/typesense-fumadocs-adapter && npm publish",
-    "test": "cd packages/typesense-fumadocs-adapter && bun run test",
+    "test:unit": "cd packages/typesense-fumadocs-adapter && bun run test:unit",
     "typecheck": "bunx tsc -p packages/typesense-fumadocs-adapter/tsconfig.json --noEmit",
     "test:integration:prepare": "cd docs && bun run build:index",
     "test:integration": "bun run test:integration:prepare && cd packages/typesense-fumadocs-adapter && bun run test:integration"
