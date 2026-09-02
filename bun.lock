@@ -37,7 +37,7 @@
     },
     "packages/typesense-fumadocs-adapter": {
       "name": "typesense-fumadocs-adapter",
-      "version": "0.4.2",
+      "version": "0.4.3",
       "devDependencies": {
         "@types/bun": "latest",
         "tsdown": "^0.20.3",

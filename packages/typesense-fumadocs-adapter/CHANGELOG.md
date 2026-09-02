@@ -1,5 +1,11 @@
 # typesense-fumadocs-adapter
 
+## 0.4.3
+
+### Patch Changes
+
+- fix(search): preserve markdown in highlighted results
+
 ## 0.4.2
 
 ### Patch Changes
