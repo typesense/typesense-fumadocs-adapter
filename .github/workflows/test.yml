@@ -45,7 +45,7 @@ jobs:
         run: bun run typecheck
 
       - name: Run unit tests
-        run: bun run test
+        run: bun run test:unit
 
       - name: Build package
         run: bun run plugin-build

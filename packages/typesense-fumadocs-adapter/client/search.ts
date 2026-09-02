@@ -1,6 +1,9 @@
 import type { TypesenseDocument } from '../index';
 import type { Client } from 'typesense';
-import type { SortedResult } from 'fumadocs-core/search';
+import {
+  createContentHighlighter,
+  type SortedResult,
+} from 'fumadocs-core/search';
 import type {
   SearchResponse,
   SearchResponseHit,
@@ -65,10 +68,12 @@ function parseSnippet(snippet: string): HighlightedText[] {
 
 export function groupResults(
   hits: SearchResponseHit<TypesenseDocument>[],
+  query: string,
   legacy?: boolean,
 ): SortedResult[] {
   const grouped: SortedResult[] = [];
   const scannedUrls = new Set<string>();
+  const highlighter = createContentHighlighter(query);
 
   for (const doc of hits) {
     const hit = doc.document;
@@ -77,7 +82,7 @@ export function groupResults(
     if (!scannedUrls.has(hit.url)) {
       scannedUrls.add(hit.url);
 
-      const title =
+      const titleSnippet =
         highlight?.searchable_title?.snippet ??
         highlight?.title?.snippet ??
         hit.title;
@@ -87,19 +92,23 @@ export function groupResults(
         type: 'page',
         breadcrumbs: hit.breadcrumbs,
         url: hit.url,
-        content: legacy ? title.replace(/<\/?mark>/g, '') : title,
-        contentWithHighlights: legacy ? parseSnippet(title) : undefined,
+        content: legacy
+          ? hit.title
+          : highlighter.highlightMarkdown(hit.title).trim(),
+        contentWithHighlights: legacy ? parseSnippet(titleSnippet) : undefined,
       });
     }
 
-    const content = highlight?.content?.snippet ?? hit.content;
+    const contentSnippet = highlight?.content?.snippet ?? hit.content;
 
     grouped.push({
       id: hit.objectID,
       type: hit.content === hit.section ? 'heading' : 'text',
       url: hit.section_id ? `${hit.url}#${hit.section_id}` : hit.url,
-      content: legacy ? content.replace(/<\/?mark>/g, '') : content,
-      contentWithHighlights: legacy ? parseSnippet(content) : undefined,
+      content: legacy
+        ? hit.content
+        : highlighter.highlightMarkdown(hit.content).trim(),
+      contentWithHighlights: legacy ? parseSnippet(contentSnippet) : undefined,
     });
   }
 
@@ -163,7 +172,7 @@ export async function searchDocs(
   const flatHits = result.grouped_hits?.flatMap((group) => group.hits) || [];
 
   return {
-    results: groupResults(flatHits, legacy),
+    results: groupResults(flatHits, query, legacy),
     raw: result,
   };
 }
