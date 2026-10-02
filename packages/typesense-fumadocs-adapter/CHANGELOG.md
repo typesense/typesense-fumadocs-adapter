@@ -1,5 +1,17 @@
 # typesense-fumadocs-adapter
 
+## 0.5.0
+
+### Minor Changes
+
+- Add `createTypesenseSearchCache({ maxEntries, ttlMs })` and a `cache` option for `useTypesenseSearch`. The shared default cache retains up to 100 least recently used responses with a 5-minute TTL. Set either limit to zero to disable caching.
+
+- Add `cacheNamespace` to identify index revisions or custom search sources while preserving the internally debounced query. Keep `key` as a deprecated alias; `cacheNamespace` takes precedence when both are supplied.
+
+- Cancel obsolete Typesense requests when search parameters change or the hook unmounts. Custom `onSearch` callbacks receive an optional fourth `AbortSignal` argument.
+
+- Fix client search cache collisions across locales, collections, clients, tags, and result formats. Prevent obsolete requests from updating results, errors, loading state, or the cache.
+
 ## 0.4.3
 
 ### Patch Changes
