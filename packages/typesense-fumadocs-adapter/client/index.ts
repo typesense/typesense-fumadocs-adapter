@@ -76,8 +76,9 @@ export function useTypesenseSearch({
 
     setIsLoading(true);
     let interrupt = false;
+    const controller = new AbortController();
 
-    void searchDocs(debouncedValue, options)
+    void searchDocs(debouncedValue, options, controller.signal)
       .then((res) => {
         if (interrupt) return;
 
@@ -96,6 +97,7 @@ export function useTypesenseSearch({
 
     return () => {
       interrupt = true;
+      controller.abort();
     };
     // The key captures the request parameters. Inline onSearch callbacks may
     // change identity each render; use cacheNamespace to identify a different source.

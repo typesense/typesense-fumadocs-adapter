@@ -31,10 +31,12 @@ export interface TypesenseOptions {
    */
   legacy?: boolean;
 
+  /** Custom search transport. Forward signal to support cancellation of obsolete requests. */
   onSearch?: (
     query: string,
     tag?: string,
     locale?: string,
+    signal?: AbortSignal,
   ) => Promise<SearchResponse<TypesenseDocument>>;
 }
 
@@ -125,6 +127,7 @@ export async function searchDocs(
     locale,
     legacy,
   }: TypesenseOptions,
+  signal?: AbortSignal,
 ): Promise<{
   results: SortedResult[];
   raw: SearchResponse<TypesenseDocument>;
@@ -149,19 +152,22 @@ export async function searchDocs(
     : typesenseCollectionName;
 
   const result = onSearch
-    ? await onSearch(query, tag, locale)
+    ? await onSearch(query, tag, locale, signal)
     : await client
         .collections<TypesenseDocument>(collectionName)
         .documents()
-        .search({
-          q: query,
-          query_by: 'searchable_title,content',
-          group_by: 'page_id',
-          exclude_fields: 'out_of,search_time_ms',
-          group_limit: 3,
-          limit: 10,
-          filter_by: tag ? `tag:${tag}` : undefined,
-        });
+        .search(
+          {
+            q: query,
+            query_by: 'searchable_title,content',
+            group_by: 'page_id',
+            exclude_fields: 'out_of,search_time_ms',
+            group_limit: 3,
+            limit: 10,
+            filter_by: tag ? `tag:${tag}` : undefined,
+          },
+          { abortSignal: signal },
+        );
 
   if (!result.grouped_hits)
     return {

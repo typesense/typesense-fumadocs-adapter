@@ -238,6 +238,78 @@ describe('useTypesenseSearch cache', () => {
     expect(preview).toHaveBeenCalledTimes(1);
   });
 
+  test('aborts obsolete Typesense requests on query changes, locale changes and unmount', async () => {
+    const typesense = client();
+    const requests: {
+      collection: string;
+      query: string;
+      signal: AbortSignal;
+      resolve: (value: SearchResponse<TypesenseDocument>) => void;
+    }[] = [];
+    vi.spyOn(typesense, 'collections').mockImplementation(((collection: string) => ({
+      documents: () => ({
+        search: ({ q }: { q: string }, { abortSignal }: { abortSignal: AbortSignal }) =>
+          new Promise<SearchResponse<TypesenseDocument>>((resolve, reject) => {
+            requests.push({ collection, query: q, signal: abortSignal, resolve });
+            abortSignal.addEventListener('abort', () => {
+              reject(new DOMException('Aborted', 'AbortError'));
+            }, { once: true });
+          }),
+      }),
+    })) as unknown as Client['collections']);
+    const options = {
+      client: typesense, typesenseCollectionName: 'docs', locale: 'en', delayMs: 0,
+    };
+    const hook = await mount(options);
+    await hook.search('old');
+    expect(requests[0]!.signal.aborted).toBe(false);
+    await hook.search('new');
+    expect(requests[0]!.signal.aborted).toBe(true);
+    expect(requests[1]!.signal.aborted).toBe(false);
+    expect(hook.value.query.isLoading).toBe(true);
+    expect(hook.value.query.error).toBeUndefined();
+    await hook.render({ ...options, locale: 'fr' });
+    expect(requests[1]!.signal.aborted).toBe(true);
+    expect(requests[2]!).toMatchObject({ collection: 'docs_fr', query: 'new' });
+    expect(requests[2]!.signal.aborted).toBe(false);
+    await act(async () => requests[2]!.resolve(response('current result')));
+    expect(hook.value.query.data).toMatchObject([{ content: 'Page' }, { content: 'current result' }]);
+    expect(hook.value.query.error).toBeUndefined();
+    expect(hook.value.query.isLoading).toBe(false);
+    await hook.search('pending');
+    await hook.unmount();
+    expect(requests[3]!.signal.aborted).toBe(true);
+  });
+
+  test('passes an optional fourth signal to onSearch and ignores cleanup cancellation errors', async () => {
+    const signals: AbortSignal[] = [];
+    const onSearch = vi.fn<NonNullable<Options['onSearch']>>((query, tag, locale, signal) => {
+      if (!signal) throw new Error('Missing search signal');
+      signals.push(signal);
+      if (signals.length > 1) return Promise.resolve(response('fresh result'));
+      return new Promise<SearchResponse<TypesenseDocument>>((resolve, reject) => {
+        signal.addEventListener('abort', () => {
+          reject(new DOMException('Aborted', 'AbortError'));
+        }, { once: true });
+      });
+    });
+    const options = {
+      client: client(), typesenseCollectionName: 'docs', onSearch, delayMs: 0,
+      tag: 'guide', locale: 'en', cacheNamespace: 'revision-1',
+    };
+    const hook = await mount(options);
+    await hook.search('query');
+    expect(onSearch).toHaveBeenLastCalledWith('query', 'guide', 'en', expect.any(AbortSignal));
+    await hook.render({ ...options, cacheNamespace: 'revision-2' });
+    expect(signals[0]!.aborted).toBe(true);
+    expect(signals[1]!.aborted).toBe(false);
+    expect(hook.value.query.error).toBeUndefined();
+    expect(hook.value.query.isLoading).toBe(false);
+    expect(hook.value.query.data).toMatchObject([{ content: 'Page' }, { content: 'fresh result' }]);
+    await hook.unmount();
+    expect(signals[1]!.aborted).toBe(true);
+  });
+
   test('obsolete failures cannot end a newer request or replace its error state', async () => {
     let rejectOld!: (error: Error) => void;
     let resolveNew!: (value: SearchResponse<TypesenseDocument>) => void;
