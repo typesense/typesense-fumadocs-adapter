@@ -1,8 +1,8 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { type SortedResult } from 'fumadocs-core/search';
 import { useDebounce } from './utils';
-import { useOnChange } from 'fumadocs-core/utils/use-on-change';
 import { searchDocs, type TypesenseOptions } from './search';
+import { getSearchCacheKey, SearchCache, type TypesenseSearchCacheOptions } from './cache';
 import type { SearchResponse } from 'typesense/lib/Typesense/Documents';
 import type { TypesenseDocument } from '../index';
 
@@ -22,37 +22,51 @@ interface SearchResult {
   raw?: SearchResponse<TypesenseDocument>;
 }
 
-const cache = new Map<string, SearchResult>();
+export type { TypesenseSearchCacheOptions } from './cache';
+export type TypesenseSearchCache = SearchCache<SearchResult>;
+
+/** Create once and share between hooks that should use the same cache policy. */
+export function createTypesenseSearchCache(
+  options: TypesenseSearchCacheOptions = {},
+): TypesenseSearchCache {
+  return new SearchCache<SearchResult>(options);
+}
+
+const defaultCache = createTypesenseSearchCache();
 
 export function useTypesenseSearch({
   delayMs = 100,
   allowEmpty = false,
   key,
+  cacheNamespace,
+  cache = defaultCache,
   ...options
 }: TypesenseOptions & {
   delayMs?: number;
   allowEmpty?: boolean;
+  /** @deprecated Use cacheNamespace instead. Ignored when cacheNamespace is supplied. */
   key?: string;
+  /** Additional cache namespace, e.g. an index revision or custom `onSearch` source. */
+  cacheNamespace?: string;
+  /** Shared cache instance. Defaults to 100 entries with a five-minute TTL. */
+  cache?: TypesenseSearchCache;
 }): UseTypesenseSearch {
   const [search, setSearch] = useState('');
   const [result, setResult] = useState<SearchResult>({ results: 'empty' });
   const [error, setError] = useState<Error>();
   const [isLoading, setIsLoading] = useState(false);
   const debouncedValue = useDebounce(search, delayMs);
-  const onStart = useRef<() => void>(undefined);
+  const cacheKey = getSearchCacheKey(debouncedValue, options, cacheNamespace ?? key);
 
-  const cacheKey = useMemo(() => {
-    return key ?? JSON.stringify([debouncedValue, options.tag]);
-  }, [debouncedValue, options.tag, key]);
-
-  useOnChange(cacheKey, () => {
-    const cached = cache.get(cacheKey);
-
-    if (onStart.current) {
-      onStart.current();
-      onStart.current = undefined;
+  useEffect(() => {
+    if (debouncedValue.length === 0 && !allowEmpty) {
+      setIsLoading(false);
+      setError(undefined);
+      setResult({ results: 'empty' });
+      return;
     }
 
+    const cached = cache.get(cacheKey);
     if (cached) {
       setIsLoading(false);
       setError(undefined);
@@ -62,32 +76,30 @@ export function useTypesenseSearch({
 
     setIsLoading(true);
     let interrupt = false;
-    onStart.current = () => {
-      interrupt = true;
-    };
 
-    async function run(): Promise<SearchResult> {
-      if (debouncedValue.length === 0 && !allowEmpty)
-        return { results: 'empty' };
-
-      return searchDocs(debouncedValue, options);
-    }
-
-    void run()
+    void searchDocs(debouncedValue, options)
       .then((res) => {
-        cache.set(cacheKey, res);
         if (interrupt) return;
 
+        cache.set(cacheKey, res);
         setError(undefined);
         setResult(res);
       })
       .catch((err: unknown) => {
+        if (interrupt) return;
         setError(err as Error);
       })
       .finally(() => {
+        if (interrupt) return;
         setIsLoading(false);
       });
-  });
+
+    return () => {
+      interrupt = true;
+    };
+    // The key captures the request parameters. Inline onSearch callbacks may
+    // change identity each render; use cacheNamespace to identify a different source.
+  }, [cache, cacheKey, allowEmpty]);
 
   return {
     search,

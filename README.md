@@ -59,6 +59,15 @@ Build the adapter package:
 bun run plugin-build
 ```
 
+Run the pure unit tests with `bun run test:unit`. React hook tests run in real Chromium through Vitest Browser Mode:
+
+```bash
+bun run test:browser:install
+bun run test:browser
+```
+
+Browser tests require Node.js 24 and use mocked Typesense responses so Typesense server is not required.
+
 Run the documentation site locally:
 
 ```bash
